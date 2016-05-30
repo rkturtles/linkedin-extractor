@@ -1,0 +1,23 @@
+{
+	"manifest_version": 2,
+	"name": "LinkedIn Extractor",
+	"version": "1.0",
+	"background": {
+		"scripts": ["background.js"]
+	},
+	"content_scripts": [{
+		"matches": [
+			"*://www.linkedin.com/vsearch/*"
+		],
+		"js": ["jquery.min.js", "run.js"],
+		"run_at": "document_end"
+	}],
+	"web_accessible_resources": [
+		"*.html"
+	],
+	"browser_action": {
+		"default_title": "LinkedIn Extractor"
+	},
+	"permissions": ["storage", "unlimitedStorage", "storage", "<all_urls>"],
+	"description": "Extract data from LinkedIn"
+}
