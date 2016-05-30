@@ -2,7 +2,7 @@
 
 To Install:
 
-1) Download this gist as a zip (click on button to download as zip).
+1) Download as a zip (click on button to download as zip).
 
 2) Extract the zip.
 
