@@ -12,6 +12,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		if(request.toSaveDetails && Object.keys(request.toSaveDetails).length)
 			localStorage.setItem('savedDetails', JSON.stringify(request.toSaveDetails));
 		sendResponse();
+	} else if(request.message === "options") {
+		chrome.runtime.openOptionsPage(function() {});
 	}
 	
 	return false;
