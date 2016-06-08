@@ -18,6 +18,7 @@
 	"browser_action": {
 		"default_title": "LinkedIn Extractor"
 	},
+	"options_page": "options.html",
 	"permissions": ["storage", "unlimitedStorage", "storage", "<all_urls>"],
 	"description": "Extract data from LinkedIn"
 }

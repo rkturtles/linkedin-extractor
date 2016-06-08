@@ -3,16 +3,24 @@ var intervals = [];
 
 var savedDetails = {};
 
+var stoppingAfter = 0;
+
 function start() {
 	stopping = false;
 	$('#extractor-start-button').text('Stop');
+	stoppingAfter = parseInt($('#extractor-stopping-number').val()) || 0;
+	
+	$('#extractor-stopping-after-number').text(stoppingAfter);
+
+	$('#extractor-stopping').fadeIn();
 	startVisiting(0);	
 }
 
 function stop() {
 	stopping = true;
 	$('#extractor-start-button').text('Start');
-	
+	$('#extractor-stopping').hide();
+
 	for(var i = 0; i < intervals.length; i++) {
 		clearInterval(intervals[i]);
 	}
@@ -72,15 +80,22 @@ function startVisiting(i) {
 					visitPerson(personLink, function(profileDetails) {
 						saveOrPrint(profileDetails);
 						
-						var visited = parseInt($('#extractor-visited').text());
-						visited++;
-						$('#extractor-visited').text(visited);
+						incrementVisitCount();
 	
 						if(nowText.indexOf('(Visited)') === -1) {
 							nowText = nowText.replace('(Next To Visit)', '(Visited)');
 							$(personTitle).text(nowText);
 						}
-						startVisiting(i);
+
+						stoppingAfter--;
+						$('#extractor-stopping-after-number').text(stoppingAfter);
+						
+						if(stoppingAfter <= 0) {
+							stop();	
+						} else {
+							startVisiting(i);
+						}
+
 						return;
 					});
 				}
@@ -137,6 +152,7 @@ function visitPerson(link, completed) {
 		var interests = $($(html).find('#interests-view li')).text();
 
 		var link = $($(html).find('#top-card .view-public-profile')).text();
+
 		var companyWebsite = '';
 
 		var profileDetails = {
@@ -170,7 +186,7 @@ function visitPerson(link, completed) {
 				var companyWebsite = JSON.parse(str).website;
 				
 				if(companyWebsite)
-					profileDetails.companyWebsite = companyWebsite;
+					profileDetails.companyWebsite = companyWebsite.toLowerCase().trim();
 
 				completed(profileDetails);
 				return;
@@ -178,6 +194,24 @@ function visitPerson(link, completed) {
 		}
 	
 	});
+}
+
+function incrementVisitCount() {
+		var day = savedDetails.day || 0;
+		var visited = savedDetails.visited || 0;
+		
+		var nowDay = new Date().getDate();
+		if(day != nowDay) {
+			visited = 0;
+			savedDetails.day = nowDay;
+			savedDetails.visited = 0;
+		}
+
+		visited++;
+
+		savedDetails.visited = visited;
+		$('#extractor-visited').text(visited);
+		chrome.runtime.sendMessage({'message' : 'save', 'toSaveDetails' : savedDetails}, function() {});
 }
 
 function saveOrPrint(details) {
@@ -205,9 +239,7 @@ function initialize(complete) {
 	chrome.runtime.sendMessage({'message' : 'load'}, function(returnedDetails) {
 		if(returnedDetails)
 			savedDetails = returnedDetails;
-		
-		var API = savedDetails.API || '';
-		
+
 		$.get(chrome.extension.getURL("toolbar.html"), function(toolbarHTML) {
 			$('#srp_main_').append(toolbarHTML);
 		
@@ -216,10 +248,31 @@ function initialize(complete) {
 				$('#extractor-save-to').val(API);
 			}
 			
+			var API = savedDetails.API || '';
+					
+			var day = savedDetails.day || 0;
+			var visited = savedDetails.visited || 0;
+			
+			var nowDay = new Date().getDate();
+			if(day != nowDay) {
+				visited = 0;
+				savedDetails.day = nowDay;
+				savedDetails.visited = 0;
+				chrome.runtime.sendMessage({'message' : 'save', 'toSaveDetails' : savedDetails}, function() {});
+			}		
+	
+			$('#extractor-visited').text(visited);
+
 			complete();
 		});
 	});
 	
+}
+
+//add more functions
+function extend() {
+
+
 }
 
 $(function() {
@@ -251,5 +304,22 @@ $(function() {
 		}, 2000);
 	});
 
-	initialize(function() {});	
+	$('#srp_main_').on('click', '#extractor-options', function() {
+		chrome.runtime.sendMessage({'message' : 'options'}, function() {});
+	});
+
+	$('#srp_main_').on('change', '#extractor-stopping-number', function() {
+		var max = parseInt($(this).attr('max'));
+		var min = parseInt($(this).attr('min'));
+
+		if($(this).val() > max) {
+			$(this).val(max);
+		} else if($(this).val() < min) {
+			$(this).val(min);
+		}
+	});
+
+	initialize(function() {
+		extend();
+	});	
 });

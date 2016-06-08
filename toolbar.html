@@ -1,17 +1,22 @@
-<div align="center" style="position:fixed; right: 0px; bottom: 0px; padding: 10px 10px 10px 10px; height: 270px; width: 200px; background-color: #1DABB8; color: white; z-index: 999;">
+<div align="center" style="position:fixed; right: 0px; bottom: 0px; padding: 10px 10px 10px 10px; height: 350px; width: 200px; background-color: #1DABB8; color: white; z-index: 999;">
 	<p style="font-size:16px"><b>LinkedIn Extractor</b><p>
-	<div style="padding-top:20px;padding-bottom:30px">
+	<p><a style="color:white;text-decoration:underline" href="#" id="extractor-options">Options</a></p>
+	<div style="padding-top:10px">
 		<button id="extractor-start-button" style="padding: 20px 20px">Start</button>
 	</div>
+	
+	<div style="padding-top:10px">
+		<p id="extractor-stop-after-text">Stop after: <input type="number" id="extractor-stopping-number" min="1" max="300" value=100> visits</p>
+	</div>
+	
 
-	<div style="padding-top:10px;padding-bottom:30px">
-		<input id="extractor-save-to" type="text" style="padding-bottom: 5px" value="" placeholder="https://">
-		<button id="extractor-change-save" style="padding: 20px 20px">Save To This API</button> 
+	<div style="padding-top:10px;">
 
 	</div>
 
-	<div align="left">
-		<p>Visited: <b><span id="extractor-visited">0</span></b></p>
+	<div align="left" style="padding-top:10px">
+		<p style="display:none" id="extractor-stopping">Stopping after <b><span id="extractor-stopping-after-number">0</span></b> more visits</p>
+		<p>Visited Today: <b><span id="extractor-visited">0</span></b></p>
 		<p>Next visit in: <b><span id="extractor-next-visit">0</span></b></p>
 	</div>
 </div>
