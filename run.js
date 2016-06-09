@@ -5,6 +5,16 @@ var savedDetails = {};
 
 var stoppingAfter = 0;
 
+var text_done = '(Done)';
+var text_already_done = '(Skipped - Already Done)';
+var text_visiting_extracting = '(Visiting & Extracting)';
+var text_next_to_visit = '(Next To Visit)';
+
+var color_done = '#39D5FF';
+var color_already_done = '#F6C4A3';
+var color_visiting_extracting = '#5EFAF7';
+var color_next_to_visit = '#FFCCBC';
+
 function start() {
 	stopping = false;
 	$('#extractor-start-button').text('Stop');
@@ -44,18 +54,21 @@ function startVisiting(i) {
 			i++;
 
 			//dont visit again if already visited
-			if(!personLink || nowText.indexOf('LinkedIn Member') > -1 || nowText.indexOf('(Next To Visit)') > -1 || nowText.indexOf('(Visited)') > -1 || nowText.indexOf('(Skipped)') > -1) {
-				startVisiting(i);
+			if(!personLink || nowText.indexOf('LinkedIn Member') > -1 || nowText.indexOf(text_next_to_visit) > -1 || nowText.indexOf(text_done) > -1 || nowText.indexOf(text_already_done) > -1) {
 
-				if(nowText.indexOf('(Skipped)') === -1) {
-					nowText = nowText.replace(' (Visited)', '').replace(' (Next To Visit)', '');
-					$(personTitle).text(nowText + ' (Skipped)');
+				if(nowText.indexOf(text_already_done) === -1) {
+					nowText = nowText.replace(' ' + text_done, '').replace(' ' + text_next_to_visit, '');
+					$(personTitle).text(nowText + ' ' + text_already_done);
+					$(personRow).css('background-color', color_already_done);
 				}
+
+				startVisiting(i);
 				return;
 			}
 			
 
-			nowText += " (Next To Visit)";
+			nowText += " " + text_next_to_visit;
+			$(personRow).css('background-color', color_next_to_visit);
 			$(personTitle).text(nowText);
 			
 			var delay = Math.round(Math.random() * (25000 - 10000)) + 10000;								
@@ -76,15 +89,22 @@ function startVisiting(i) {
 						clearInterval(intervals[intervalIndex]);
 						intervals.splice(intervalIndex, 1);
 					}
-								
+						
+					if(nowText.indexOf(text_visiting_extracting) === -1) {
+						nowText = nowText.replace(text_next_to_visit, text_visiting_extracting);
+						$(personTitle).text(nowText);
+						$(personRow).css('background-color', color_visiting_extracting);
+					}		
+
 					visitPerson(personLink, function(profileDetails) {
 						saveOrPrint(profileDetails);
 						
 						incrementVisitCount();
 	
-						if(nowText.indexOf('(Visited)') === -1) {
-							nowText = nowText.replace('(Next To Visit)', '(Visited)');
+						if(nowText.indexOf(text_done) === -1) {
+							nowText = nowText.replace(text_visiting_extracting, text_done);
 							$(personTitle).text(nowText);
+							$(personRow).css('background-color', color_done);
 						}
 
 						stoppingAfter--;
@@ -131,6 +151,10 @@ function visitPerson(link, completed) {
 
 		var name = $($(html).find('.full-name')).text();
 		var headline = $($(html).find('#headline')).text();
+		var title = $($(html).find('#background-experience .current-position header h4')).map(function() {
+				return $(this).text();
+			}).get().join(' ,');
+
 		var locality = $($(html).find('#top-card .locality')).text();
 		var industry = $($(html).find('#top-card .industry')).text();
 		var currentCompanies = $($(html).find('#overview-summary-current ol')).text();
@@ -158,6 +182,7 @@ function visitPerson(link, completed) {
 		var profileDetails = {
 			name: name,
 			headline: headline,
+			title: title,
 			locality: locality,
 			industry: industry,
 			currentCompanies: currentCompanies,
@@ -269,12 +294,6 @@ function initialize(complete) {
 	
 }
 
-//add more functions
-function extend() {
-
-
-}
-
 $(function() {
 	$('#srp_main_').on('click', '#extractor-start-button', function() {
 		var text = $(this).text();
@@ -323,3 +342,9 @@ $(function() {
 		extend();
 	});	
 });
+
+//add more functions
+function extend() {
+
+
+}
