@@ -11,6 +11,12 @@
 		],
 		"js": ["jquery.min.js", "run.js"],
 		"run_at": "document_end"
+	}, {
+		"matches": [
+			"*://www.linkedin.com/sales/search*"
+		],
+		"js": ["jquery.min.js", "runS.js"],
+		"run_at": "document_end"
 	}],
 	"web_accessible_resources": [
 		"*.html"
