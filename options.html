@@ -3,15 +3,20 @@
 <head><title>LinkedIn Extractor Options</title></head>
 	<body>
 		<h2>Options</h2>
-		
 		<div>
 			<h3>Save to this API:</h3>
 			<input id="extractor-save-to" type="text" style="padding-bottom: 5px" value="" placeholder="https://">
 			<button id="extractor-change-save">Save To This API</button>
 		</div>
-		
+		<div>
+			<h3>Previously Visited</h3>
+			<p id="extractor-stop-after-text">Do not extract from profiles that LinkedIn Extractor has visited within the last <input type="number" id="extractor-skip-days" min="0" value="365"> days. <button id="extractor-skip-days-save">Save This Setting</button></p>
+			<p>Using this rule, LinkedIn Extractor will currently skip <b><span id="extractor-skip-number">calculating...</span></b> profiles. 			<button id="extractor-skip-clear">Clear this list</button></p>
+
+		</div>
+
 		<script src="jquery.min.js"></script>
 		<script src="options.js"></script>
-	
+
 	</body>
 </html>

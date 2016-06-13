@@ -15,6 +15,12 @@ var color_already_done = '#E7E7E7';
 var color_visiting_extracting = '#5EFAF7';
 var color_next_to_visit = '#FFCCBC';
 
+chrome.extension.onMessage.addListener(function(message, sender, sendResponse) {
+	if (message.action == 'update' && message.value) {
+		savedDetails = message.value;
+	}
+});
+
 function start() {
 	stopping = false;
 	$('#extractor-start-button').text('Stop');
@@ -56,7 +62,7 @@ function startVisiting(i) {
 		//dont visit again if already visited
 		if (!personLink || nowText.indexOf('LinkedIn Member') > -1 || nowText.indexOf(
 				text_next_to_visit) > -1 || nowText.indexOf(text_done) > -1 || nowText.indexOf(
-				text_already_done) > -1) {
+				text_already_done) > -1 || !canVisit(personLink)) {
 
 			if (nowText.indexOf(text_already_done) === -1) {
 				nowText = nowText.replace(' ' + text_done, '').replace(' ' +
@@ -267,6 +273,56 @@ function saveOrPrint(details) {
 	}
 
 	console.log(details);
+}
+
+
+function getProfileId(viewLink) {
+	var matched = viewLink.match(/targetId%3.*?%/i);
+	var idStr = '';
+
+	if (matched) {
+		idStr = matched[0];
+	}
+
+	return idStr.replace(/%/gi, '').replace(/targetId/i, '').trim();
+}
+
+function canVisit(viewLink) {
+	var idStr = getProfileId(viewLink);
+
+	if (!idStr)
+		return true;
+
+	if (typeof savedDetails.idsVisited === 'undefined') {
+		savedDetails.idsVisited = {};
+	}
+
+	var idsVisited = savedDetails.idsVisited;
+
+	var daysSkip = savedDetails.daysSkip;
+
+	if (typeof daysSkip === 'undefined') {
+		daysSkip = 365;
+		savedDetails.daysSkip = 365;
+	}
+
+	var nowTime = new Date().getTime();
+	var visitedAgo = idsVisited[idStr] || 0;
+
+	if ((nowTime - visitedAgo) <= daysSkip * 24 * 60 * 1000) {
+		return false;
+	} else {
+		idsVisited[idStr] = nowTime;
+
+		//saved
+		savedDetails.idsVisited[idStr] = nowTime;
+		chrome.runtime.sendMessage({
+			'message': 'save',
+			'toSaveDetails': savedDetails
+		}, function() {});
+
+		return true;
+	}
 }
 
 function initialize(complete) {
